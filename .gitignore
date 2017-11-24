@@ -1,0 +1,5 @@
+/spider/snapshot/
+/snapshots/
+__pycache__/
+log.txt
+
