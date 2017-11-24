@@ -2,6 +2,8 @@ import scrapy
 from datetime import datetime
 import lxml.html
 import os, re
+import pytz
+from datetime import datetime
 
 class CoursesSpider(scrapy.Spider):
     name = 'courses'
@@ -14,11 +16,15 @@ class CoursesSpider(scrapy.Spider):
             self.start_urls = kwargs.get('start_urls').split(',')
         else:
             self.start_urls = ['https://w5.ab.ust.hk/wcq/cgi-bin/']
+        self.time = datetime.now(tz=pytz.timezone('Hongkong')).strftime('%Y-%m-%d %H:%M')
         os.makedirs('snapshot/subjects', exist_ok=True)
 
     def parse(self, response):
         index = lxml.html.parse('index_template.html')
         depts = index.xpath('//div[@class="depts"]')[0]
+        self.term = response.xpath('//li[@class="term"]//a[@onclick]/text()').extract_first().strip()
+        title = index.xpath('//head/title')[0]
+        title.text = '%s: Snapshot taken at %s' % (self.term, self.time)
         for a in response.css('div.depts a'):
             el = lxml.html.fromstring(a.extract())
             el.set('href', 'subjects/%s.html' % el.get('href').split('/')[-1])
@@ -41,7 +47,10 @@ class CoursesSpider(scrapy.Spider):
         for link in root.cssselect('td > a[href*="instructor"]'):
             link.tail = link.text
             link.drop_tree()
-        filepath = 'snapshot/subjects/%s.html' % response.url.split('/')[-1]
+        dept = response.url.split('/')[-1]
+        title = root.xpath('//head/title')[0]
+        title.text = '%s %s: Snapshot taken at %s' % (self.term, dept, self.time)
+        filepath = 'snapshot/subjects/%s.html' % dept
         with open(filepath, 'wb') as f:
             s = lxml.html.tostring(root)
             # link js and css files to the original website

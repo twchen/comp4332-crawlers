@@ -4,6 +4,7 @@ import subprocess
 from datetime import datetime
 import sys, os, re, pytz
 import requests
+import lxml.html
 
 terms = { '10': 'Fall', '20': 'Winter', '30': 'Spring', '40': 'Summer' }
 
@@ -11,6 +12,17 @@ terms = { '10': 'Fall', '20': 'Winter', '30': 'Spring', '40': 'Summer' }
 def get_term_dir(term_code):
     term_code = re.search(r'\d{4}', url).group()
     return '20%s/%s' % (term_code[:2], terms[term_code[-2:]])
+
+def add_to_index(path):
+    index = lxml.html.parse('snapshots/index.html')
+    ul = index.xpath('//ul')[0]
+    snapshot_index = lxml.html.parse(os.path.join(path, 'index.html'))
+    text = snapshot_index.xpath('//head/title/text()')[0].replace(': Snapshot taken', '')
+    href = path[10:]
+    li = lxml.html.fromstring('<li><a href="%s">%s</a></li>' % (href, text))
+    ul.append(li)
+    with open('snapshots/index.html', 'wb') as f:
+        f.write(lxml.html.tostring(index))
 
 def main():
     if len(sys.argv) == 1:
@@ -31,6 +43,7 @@ def main():
     if res.returncode == 0:
         os.makedirs(path)
         subprocess.run('mv spider/snapshot/* %s' % path, shell=True)
+        add_to_index(path)
 
 if __name__ == '__main__':
     main()
