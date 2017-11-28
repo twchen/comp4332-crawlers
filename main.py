@@ -14,7 +14,11 @@ def get_term_dir(term_code):
     return '20%s/%s' % (term_code[:2], terms[term_code[-2:]])
 
 def add_to_index(path):
-    index = lxml.html.parse('snapshots/index.html')
+    if os.path.exists('snapshots/index.html'):
+        index_file = 'snapshots/index.html'
+    else:
+        index_file = 'snapshots_index.html'
+    index = lxml.html.parse(index_file)
     ul = index.xpath('//ul')[0]
     snapshot_index = lxml.html.parse(os.path.join(path, 'index.html'))
     text = snapshot_index.xpath('//head/title/text()')[0].replace(': Snapshot taken', '')
@@ -39,7 +43,7 @@ def main():
     if os.path.exists(path):
         print('Pages already crawled')
         return
-    res = subprocess.run('scrapy crawl courses -a start_url=%s' % start_url, shell=True, cwd='spider')
+    res = subprocess.run('/usr/local/bin/scrapy crawl courses -a start_url=%s' % start_url, shell=True, cwd='spider')
     if res.returncode == 0:
         os.makedirs(path)
         subprocess.run('mv spider/snapshot/* %s' % path, shell=True)
