@@ -32,8 +32,7 @@ class CoursesSpider(scrapy.Spider):
             el.set('href', 'subjects/%s.html' % el.get('href').split('/')[-1])
             depts.append(el)
             yield response.follow(a, callback=self.parse_dept)
-        with open('snapshot/index.html', 'wb') as f:
-            f.write(lxml.html.tostring(index))
+        index.write('snapshot/index.html', encoding='UTF-8', method='html')
 
     def parse_dept(self, response):
         index = copy.deepcopy(self.template)
@@ -52,5 +51,4 @@ class CoursesSpider(scrapy.Spider):
         dept = response.url.split('/')[-1]
         title = index.xpath('//head/title')[0]
         title.text = '%s %s: Snapshot taken at %s' % (self.term, dept, self.time)
-        with open('snapshot/subjects/%s.html' % dept, 'wb') as f:
-            f.write(lxml.html.tostring(index))
+        index.write('snapshot/subjects/%s.html' % dept, encoding='UTF-8', method='html')
