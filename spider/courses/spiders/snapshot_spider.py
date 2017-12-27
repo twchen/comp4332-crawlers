@@ -6,11 +6,16 @@ import pytz
 from datetime import datetime
 import copy
 
-class CoursesSpider(scrapy.Spider):
-    name = 'courses'
+class SnapshotSpider(scrapy.Spider):
+    name = 'snapshot'
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'courses.pipelines.CompletePipeline': 900
+        }
+    }
 
     def __init__(self, *args, **kwargs):
-        super(CoursesSpider, self).__init__(*args, **kwargs)
+        super(SnapshotSpider, self).__init__(*args, **kwargs)
         if 'start_url' in kwargs:
             self.start_urls = [kwargs.get('start_url')]
         elif 'start_urls' in kwargs:

@@ -16,6 +16,8 @@ NEWSPIDER_MODULE = 'courses.spiders'
 
 LOG_ENABLED = True
 LOG_FILE = 'log.txt'
+LOG_STDOUT = False
+MONGO_URI = 'mongodb://localhost:27017'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'courses (+http://www.yourdomain.com)'
@@ -66,9 +68,9 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'courses.pipelines.CoursesPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'courses.pipelines.CompletePipeline': 900,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
