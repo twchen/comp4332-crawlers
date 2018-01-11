@@ -22,7 +22,9 @@ class SnapshotSpider(scrapy.Spider):
             self.start_urls = kwargs.get('start_urls').split(',')
         else:
             self.start_urls = ['https://w5.ab.ust.hk/wcq/cgi-bin/']
-        self.time = datetime.now(tz=pytz.timezone('Hongkong')).strftime('%Y-%m-%d %H:%M')
+        now = datetime.now(tz=pytz.timezone('Hongkong'))
+        minute = '00' if now.minute < 30 else '30'
+        self.time = now.strftime('%Y-%m-%d %H:') + minute
         self.template = lxml.html.parse('template.html')
         os.makedirs('snapshot/subjects', exist_ok=True)
 

@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-cd ~/git-repos/hkust_courses
-python3 ./main.py
-cd snapshots
-git add .
-git commit -m "added new snapshot at $(TZ=Hongkong date +%m-%d\ %H:%M)"
-git push
+#pip install -r requirements.txt
+(crontab -l 2>/dev/null; echo "0,30 * * * * bash -c \"cd $(pwd) && python main.py\"") | crontab -
 
