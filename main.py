@@ -8,11 +8,6 @@ import lxml.html
 
 terms = { '10': 'Fall', '20': 'Winter', '30': 'Spring', '40': 'Summer' }
 
-
-def get_term_dir(term_code):
-    term_code = re.search(r'\d{4}', url).group()
-    return '20%s/%s' % (term_code[:2], terms[term_code[-2:]])
-
 def add_to_index(path):
     if os.path.exists('snapshots/index.html'):
         index_file = 'snapshots/index.html'
@@ -49,12 +44,12 @@ def main():
     if os.path.exists(path):
         print('Pages already crawled')
         return
-    res = subprocess.run('/usr/local/bin/scrapy crawl snapshot -a start_url=%s' % start_url, shell=True, cwd='spider')
+    res = subprocess.run('scrapy crawl snapshot -a start_url=%s' % start_url, shell=True, cwd='spider')
     if res.returncode == 0:
         os.makedirs(path)
         subprocess.run('mv spider/snapshot/* %s' % path, shell=True)
         add_to_index(path)
-        push_to_git()
+        #push_to_git()
 
 if __name__ == '__main__':
     main()
