@@ -17,6 +17,7 @@ NEWSPIDER_MODULE = 'courses.spiders'
 LOG_ENABLED = True
 LOG_FILE = 'log.txt'
 LOG_STDOUT = False
+LOG_LEVEL = 'ERROR'
 MONGO_URI = 'mongodb://localhost:27017'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
