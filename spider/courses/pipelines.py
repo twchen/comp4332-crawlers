@@ -22,7 +22,11 @@ class MongoPipeline(object):
         return cls(mongo_uri=crawler.settings.get('MONGO_URI'))
 
     def open_spider(self, spider):
-        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.client = pymongo.MongoClient(self.mongo_uri,
+            username='comp4332',
+            password='bigdata',
+            authSource='courses_db'
+        )
         self.db = self.client['courses_db']
         docs = self.db['courses'].aggregate([
             {
@@ -54,7 +58,7 @@ class MongoPipeline(object):
                 {'code': code, 'semester': semester},
                 {'$push': {
                         'sections': {
-                            '$each': course['sections']
+                            '$each': item['sections']
                         }
                     }
                 }
