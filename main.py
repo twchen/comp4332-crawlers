@@ -25,7 +25,7 @@ def add_to_index(path):
 
 def push_to_git():
     subprocess.run('git add .', cwd='snapshots', shell=True)
-    subprocess.run('git commit -m "added new snapshot at $(TZ=Hongkong date +%m-%d\ %H:%M)" >/dev/null 2>&1', cwd='snapshots', shell=True)
+    subprocess.run('git commit -m "added new snapshot at $(TZ=Hongkong date +%m-%d\\ %H:%M)" >/dev/null 2>&1', cwd='snapshots', shell=True)
     subprocess.run('git push', cwd='snapshots', shell=True)
 
 def main():
