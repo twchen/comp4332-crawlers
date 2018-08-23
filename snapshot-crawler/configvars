@@ -1,0 +1,12 @@
+# crawling at the 4th minute and the 34th minute of every hour
+# do not set to "0,30" because the server goes down at about 3:00am every day
+MINUTES="4,34"
+
+GIT_PUSH=true
+GIT_URL=
+
+NOTIFY_ERROR=true
+SENDER_EMAIL=hello@twchen.cc
+SENDER_PASSWD=HHpasswd123
+SMTP_SERVER="smtp.zoho.com:587"
+RECEIVER_EMAIL=twchenhk@gmail.com

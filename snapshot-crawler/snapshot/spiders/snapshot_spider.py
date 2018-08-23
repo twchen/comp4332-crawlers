@@ -1,18 +1,14 @@
 import scrapy
 from datetime import datetime
 import lxml.html
-import os, re
+import os
 import pytz
 from datetime import datetime
 import copy
+from scrapy.utils.conf import closest_scrapy_cfg
 
 class SnapshotSpider(scrapy.Spider):
     name = 'snapshot'
-    custom_settings = {
-        'ITEM_PIPELINES': {
-            'courses.pipelines.CompletePipeline': 900
-        }
-    }
 
     def __init__(self, *args, **kwargs):
         super(SnapshotSpider, self).__init__(*args, **kwargs)
@@ -21,25 +17,29 @@ class SnapshotSpider(scrapy.Spider):
         elif 'start_urls' in kwargs:
             self.start_urls = kwargs.get('start_urls').split(',')
         else:
-            self.start_urls = ['https://w5.ab.ust.hk/wcq/cgi-bin/']
+            self.start_urls = [ 'https://w5.ab.ust.hk/wcq/cgi-bin/' ]
         now = datetime.now(tz=pytz.timezone('Hongkong'))
         minute = '00' if now.minute < 30 else '30'
         self.time = now.strftime('%Y-%m-%d %H:') + minute
         self.template = lxml.html.parse('template.html')
-        os.makedirs('snapshot/subjects', exist_ok=True)
+        proj_root = os.path.dirname(closest_scrapy_cfg())
+        # store the current snapshot at the directory self.snapshot_dir
+        self.snapshot_dir = os.path.join(proj_root, 'current-snapshot')
+        os.makedirs(f'{self.snapshot_dir}/subjects', exist_ok=True)
 
     def parse(self, response):
         index = copy.deepcopy(self.template)
         depts = index.xpath('//div[@class="depts"]')[0]
         self.term = response.xpath('//li[@class="term"]//a[@onclick]/text()').extract_first().strip()
         title = index.xpath('//head/title')[0]
-        title.text = '%s: Snapshot taken at %s' % (self.term, self.time)
+        title.text = f'{self.term}: Snapshot taken at {self.time}'
         for a in response.xpath('//div[@class="depts"]/a'):
             el = lxml.html.fromstring(a.extract())
-            el.set('href', 'subjects/%s.html' % el.get('href').split('/')[-1])
+            dept = el.get('href').split('/')[-1]
+            el.set('href', f'subjects/{dept}.html')
             depts.append(el)
             yield response.follow(a, callback=self.parse_dept)
-        index.write('snapshot/index.html', encoding='UTF-8', method='html')
+        index.write(f'{self.snapshot_dir}/index.html', encoding='UTF-8', method='html')
 
     def parse_dept(self, response):
         index = copy.deepcopy(self.template)
@@ -47,7 +47,8 @@ class SnapshotSpider(scrapy.Spider):
         # change absolute links to relative links
         for a in response.xpath('//div[@class="depts"]/a'):
             el = lxml.html.fromstring(a.extract())
-            el.set('href', '%s.html' % el.get('href').split('/')[-1])
+            dept = el.get('href').split('/')[-1]
+            el.set('href', f'{dept}.html')
             depts.append(el)
         classes = lxml.html.fromstring(response.xpath('//div[@id="classes"]')[0].extract())
         index.xpath('//body')[0].append(classes)
@@ -57,5 +58,8 @@ class SnapshotSpider(scrapy.Spider):
             link.drop_tree()
         dept = response.url.split('/')[-1]
         title = index.xpath('//head/title')[0]
-        title.text = '%s %s: Snapshot taken at %s' % (self.term, dept, self.time)
-        index.write('snapshot/subjects/%s.html' % dept, encoding='UTF-8', method='html')
+        title.text = f'{self.term} {dept}: Snapshot taken at {self.time}'
+        index.write(f'{self.snapshot_dir}/subjects/{dept}.html', encoding='UTF-8', method='html')
+
+    def closed(self, reason):
+        print('Crawling completed')
