@@ -1,5 +1,6 @@
 import smtplib
 import argparse
+import socket
 
 def send_email(from_address, password, to_address, subject, text, smtp_server):
     smtp_host, smtp_port = smtp_server.split(':')
@@ -35,7 +36,8 @@ def main():
     password = args.password
     to_address = args.to
     smtp_server = args.server
-    subject = 'Error Crawling Snapshot'
+    hostname = socket.gethostname()
+    subject = f'Error Crawling Snapshot on {hostname}'
     with open('err.txt', 'r') as f:
         text = f.read()
     send_email(from_address, password, to_address, subject, text, smtp_server)
